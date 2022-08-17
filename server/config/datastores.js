@@ -48,7 +48,7 @@ module.exports.datastores = {
     // adapter: 'sails-mongo',
     // url: 'mysql://user:password@host:port/database',
     adapter: require("sails-mongo"),
-    url: "mongodb+srv://thang123:thang123@jira.7fq1evs.mongodb.net/?retryWrites=true&w=majority",
+    url: process.env.MONGODB_URL,
     database: "tira",
   },
 };

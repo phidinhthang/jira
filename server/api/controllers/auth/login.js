@@ -5,6 +5,7 @@ module.exports = async function login(req, res) {
   const username = req.body.username;
   const password = req.body.password;
   const userAuth = await Auth.findOne({ username });
+  console.log("access token secret ", process.env.ACCESS_TOKEN_SECRET);
   if (!userAuth) {
     return res.json({
       errors: {
@@ -27,7 +28,7 @@ module.exports = async function login(req, res) {
 
   const accessToken = jwt.sign(
     { userId: user.id },
-    sails.config.custom.accessTokenSecret,
+    process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: "7d" }
   );
 

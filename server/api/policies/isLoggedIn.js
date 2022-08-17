@@ -11,10 +11,7 @@ module.exports = async function isLoggedIn(req, res, next) {
     });
   }
 
-  const tokenPayload = jwt.verify(
-    bearerToken,
-    sails.config.custom.accessTokenSecret
-  );
+  const tokenPayload = jwt.verify(bearerToken, process.env.ACCESS_TOKEN_SECRET);
   const userId = tokenPayload.userId;
 
   if (!userId) {

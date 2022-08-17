@@ -33,7 +33,7 @@ module.exports = async function register(req, res) {
     user: user.id,
   }).fetch();
 
-  const accessTokenSecret = sails.config.custom.accessTokenSecret;
+  const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
 
   const accessToken = jwt.sign({ userId: user.id }, accessTokenSecret, {
     expiresIn: "7d",
