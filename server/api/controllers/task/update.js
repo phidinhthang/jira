@@ -19,14 +19,29 @@ module.exports = async function update(req, res) {
     type,
     status,
     index,
-    assigneeIds,
-    reporterId,
+    reporter: reporterId,
     priority,
     dueAt,
     estimatedAt,
   };
 
-  const updatedTask = await Task.updateOne({ id: taskId }).set(updateFields);
+  // if (typeof index === "undefined") {
+  //   const task = await Task.findOne(taskId);
+  //   if (typeof status !== "undefined" && task.status !== status) {
+  //     const lastIndex =
+  //       (await Task.count({ project: task.projectId, status })) + 1;
+  //     updateFields["index"] = lastIndex;
+  //   }
+  // }
+
+  if (Array.isArray(assigneeIds)) {
+    await Task.replaceCollection(taskId, "assignees", assigneeIds);
+  }
+  await Task.updateOne({ id: taskId }).set(updateFields);
+  const updatedTask = await Task.findOne({ id: taskId })
+    .populate("assignees")
+    .populate("reporter")
+    .populate("project");
 
   return res.json(updatedTask);
 };

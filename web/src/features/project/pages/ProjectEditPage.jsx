@@ -1,7 +1,10 @@
 import ReactQuill from 'react-quill';
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { useGetProjectQuery } from '../../../app/services/project';
+import {
+  useGetProjectQuery,
+  useUpdateProjectMutation,
+} from '../../../app/services/project';
 import { Input } from '../../common/components/Input';
 import { Button } from '../../common/components/Button';
 import { Select } from '../../common/components/Select';
@@ -14,6 +17,7 @@ export const ProjectEditPage = () => {
   const [category, setCategory] = useState();
   const [url, setUrl] = useState();
   const [name, setName] = useState();
+  const [updateProject] = useUpdateProjectMutation();
 
   useEffect(() => {
     if (project) {
@@ -103,7 +107,14 @@ export const ProjectEditPage = () => {
             )}
           </Select>
         </div>
-        <Button type='primary'>Save changes</Button>
+        <Button
+          variant='primary'
+          onClick={() => {
+            updateProject({ id: projectId, url, name, description, category });
+          }}
+        >
+          Save changes
+        </Button>
       </div>
     </div>
   );

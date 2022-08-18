@@ -5,6 +5,7 @@ import { Input } from '../../common/components/Input';
 import { Select } from '../../common/components/Select';
 import { Button } from '../../common/components/Button';
 import ReactQuill from 'react-quill';
+import { useCreateProjectMutation } from '../../../app/services/project';
 
 export const ProjectCreateModal = () => {
   const navigate = useNavigate();
@@ -12,6 +13,8 @@ export const ProjectCreateModal = () => {
   const [name, setName] = useState('');
   const [url, setUrl] = useState('');
   const [category, setCategory] = useState('software');
+
+  const [createProject] = useCreateProjectMutation();
 
   return (
     <ReactModal
@@ -99,7 +102,21 @@ export const ProjectCreateModal = () => {
               )}
             </Select>
           </div>
-          <Button type='primary'>Save changes</Button>
+          <Button
+            variant='primary'
+            onClick={() => {
+              createProject({
+                url,
+                name,
+                description,
+                category,
+              }).then(() => {
+                navigate(`/projects`);
+              });
+            }}
+          >
+            Create
+          </Button>
         </div>
       </div>
     </ReactModal>

@@ -22,6 +22,7 @@ module.exports.routes = {
   "POST /auth/register": "auth/register",
   "POST /auth/login": "auth/login",
   "GET /auth/list": "auth/list",
+  "GET /auth/:emailToken/verify": "auth/verify",
 
   "GET /user/list": "user/list",
 
@@ -31,7 +32,7 @@ module.exports.routes = {
   "PATCH /project/update/:id": "project/update",
   "DELETE /project/delete/:id": "project/delete",
 
-  "GET /task/list": "task/list",
+  "GET /task/:projectId/list": "task/list",
   "POST /task/create": "task/create",
   "GET /task/:id": "task/getById",
   "PATCH /task/update/:id": "task/update",

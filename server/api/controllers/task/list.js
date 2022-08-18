@@ -1,3 +1,6 @@
 module.exports = async function list(req, res) {
-  return res.json(await Task.find());
+  const projectId = req.param("projectId");
+  return res.json(
+    await Task.find({ project: projectId }).populate("assignees")
+  );
 };

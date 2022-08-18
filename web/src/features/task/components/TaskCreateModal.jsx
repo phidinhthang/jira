@@ -14,6 +14,7 @@ import { Button } from '../../common/components/Button';
 import { Avatar } from '../../common/components/Avatar';
 import { TimesIcon } from '../../../icons/TimesIcon';
 import ReactQuill from 'react-quill';
+import { useCreateTaskMutation } from '../../../app/services/task';
 
 const priorityIconMap = {
   highest: <ArrowUpIcon className='text-[#CD272D]' />,
@@ -35,6 +36,7 @@ export const TaskCreateModal = () => {
   const projectId = params.projectId;
 
   const { data: users } = useGetUsersQuery();
+  const [createTask] = useCreateTaskMutation();
   const userOptions = users ? users.map((u) => ({ value: u.id, data: u })) : [];
 
   return (
@@ -291,17 +293,17 @@ export const TaskCreateModal = () => {
           </span>
         </div>
         <Button
-          type='primary'
+          variant='primary'
           onClick={() => {
-            console.log('new task', {
+            createTask({
               projectId,
               type,
               name,
               description,
-              reporterId,
-              assignees,
+              reporterId: reporterId,
+              assigneeIds: assignees,
               priority,
-            });
+            }).then(() => navigate(`/projects/${projectId}/board`));
           }}
         >
           Create

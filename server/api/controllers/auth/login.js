@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { v4: uuidv4 } = require("uuid");
 
 module.exports = async function login(req, res) {
   const username = req.body.username;
@@ -7,7 +8,7 @@ module.exports = async function login(req, res) {
   const userAuth = await Auth.findOne({ username });
   console.log("access token secret ", process.env.ACCESS_TOKEN_SECRET);
   if (!userAuth) {
-    return res.json({
+    return res.status(401).json({
       errors: {
         userDoesntExist: true,
       },
@@ -25,11 +26,16 @@ module.exports = async function login(req, res) {
   }
 
   const user = await User.findOne({ id: userAuth.user });
+  const tokenPayload = uuidv4();
+  console.log(" token payload in login ", tokenPayload);
+  await Token.create({ payload: tokenPayload, userId: user.id });
 
   const accessToken = jwt.sign(
-    { userId: user.id },
+    { payload: tokenPayload },
     process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: "7d" }
+    {
+      expiresIn: "7d",
+    }
   );
 
   res.json({

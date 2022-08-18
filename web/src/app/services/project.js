@@ -30,15 +30,42 @@ export const projectApi = createApi({
           body,
         };
       },
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        const { data: updatedProject } = await queryFulfilled;
+        dispatch(
+          projectApi.util.updateQueryData('getProject', id, (draft) => {
+            Object.assign(draft, updatedProject);
+          })
+        );
+      },
     }),
     deleteProject: build.mutation({
-      query: (data) => {
-        const { id, ...body } = data;
+      query: (projectId) => {
         return {
-          url: `project/delete/${id}`,
+          url: `project/delete/${projectId}`,
           method: 'DELETE',
-          body,
         };
+      },
+      async onQueryStarted(_, { queryFulfilled, dispatch }) {
+        try {
+          const { data: deletedProject } = await queryFulfilled;
+          dispatch(
+            projectApi.util.updateQueryData(
+              'getProjects',
+              undefined,
+              (draft) => {
+                draft.splice(
+                  draft.findIndex(
+                    (project) => project.id === deletedProject.id
+                  ),
+                  1
+                );
+              }
+            )
+          );
+        } catch (err) {
+          console.log('error when delete project ', err);
+        }
       },
     }),
     createProject: build.mutation({
@@ -48,6 +75,22 @@ export const projectApi = createApi({
           method: 'POST',
           body: data,
         };
+      },
+      async onQueryStarted(data, { queryFulfilled, dispatch }) {
+        try {
+          const { data: newProject } = await queryFulfilled;
+          dispatch(
+            projectApi.util.updateQueryData(
+              'getProjects',
+              undefined,
+              (draft) => {
+                draft.push(newProject);
+              }
+            )
+          );
+        } catch (err) {
+          console.log('error when create new project ', err);
+        }
       },
     }),
   }),

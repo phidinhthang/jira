@@ -20,7 +20,7 @@ export const taskApi = createApi({
       query: (id) => `task/${id}`,
     }),
     getTasks: build.query({
-      query: () => 'task/list',
+      query: (projectId) => `task/${projectId}/list`,
     }),
     updateTask: build.mutation({
       query: (data) => {
@@ -31,32 +31,60 @@ export const taskApi = createApi({
           body,
         };
       },
-      async onQueryStarted({ id, ...body }, { dispatch, queryFulfilled }) {
-        console.log('id ', id, 'body ', body);
-        dispatch(
-          projectApi.util.updateQueryData(
-            'getProject',
-            '62fa1536b97b9653e44b8ef7',
-            (draft) => {
-              const task = draft.tasks.find((t) => t.id === id);
-              console.log('task ', task);
-              Object.assign(task, body);
-            }
-          )
-        );
+      async onQueryStarted(
+        { id, projectId, ...body },
+        { dispatch, queryFulfilled }
+      ) {
         try {
-          await queryFulfilled;
-        } catch {}
+          dispatch(
+            taskApi.util.updateQueryData('getTasks', projectId, (draft) => {
+              const oldTask = draft.find((t) => t.id === id);
+              Object.assign(oldTask, body);
+            })
+          );
+          const { data: updatedTask } = await queryFulfilled;
+          dispatch(
+            taskApi.util.updateQueryData('getTasks', projectId, (draft) => {
+              const oldTask = draft.find((t) => t.id === id);
+              Object.assign(oldTask, updatedTask);
+            })
+          );
+          dispatch(
+            taskApi.util.updateQueryData('getTask', id, (draft) => {
+              Object.assign(draft, updatedTask);
+            })
+          );
+        } catch (err) {
+          console.log('error when update task ', err);
+        }
       },
     }),
     deleteTask: build.mutation({
-      query: (data) => {
-        const { id, ...body } = data;
+      query: (id) => {
         return {
           url: `task/delete/${id}`,
           method: 'DELETE',
-          body,
         };
+      },
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data: deletedTask } = await queryFulfilled;
+          console.log('deleted task ', deletedTask);
+          dispatch(
+            taskApi.util.updateQueryData(
+              'getTasks',
+              deletedTask.project,
+              (draft) => {
+                draft.splice(
+                  draft.findIndex((task) => task.id === deletedTask.id),
+                  1
+                );
+              }
+            )
+          );
+        } catch (err) {
+          console.log('error when delete task ', err);
+        }
       },
     }),
     createTask: build.mutation({
@@ -66,6 +94,23 @@ export const taskApi = createApi({
           method: 'POST',
           body: data,
         };
+      },
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data: newTask } = await queryFulfilled;
+          console.log('new task ', newTask);
+          dispatch(
+            taskApi.util.updateQueryData(
+              'getTasks',
+              newTask.project,
+              (draft) => {
+                draft.push(newTask);
+              }
+            )
+          );
+        } catch (err) {
+          console.log('error when create new task ', err);
+        }
       },
     }),
   }),

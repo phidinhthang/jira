@@ -3,16 +3,13 @@ module.exports = async function create(req, res) {
     name,
     description,
     type,
-    status,
     assigneeIds,
     reporterId,
     projectId,
     priority,
-    dueAt,
-    estimatedAt,
   } = req.body || {};
 
-  const index = await Task.count({ project: projectId, status });
+  const index = await Task.count({ project: projectId, status: "backlog" });
 
   console.log("index ", index);
 
@@ -20,14 +17,12 @@ module.exports = async function create(req, res) {
     name,
     description,
     type,
-    status,
+    status: "backlog",
     assignees: assigneeIds,
     reporter: reporterId,
     project: projectId,
     priority,
-    dueAt,
     index: index + 1,
-    estimatedAt,
   }).fetch();
 
   return res.json(task);

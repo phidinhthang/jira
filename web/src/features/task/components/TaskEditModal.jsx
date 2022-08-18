@@ -3,9 +3,13 @@ import { Select } from '../../common/components/Select';
 import { StoryIcon } from '../../../icons/StoryIcon';
 import { BugIcon } from '../../../icons/BugIcon';
 import { TaskIcon } from '../../../icons/TaskIcon';
+import { TrashIcon } from '../../../icons/TrashIcon';
 import { MultipleSelect } from '../../common/components/MultipleSelect';
 import { Avatar } from '../../common/components/Avatar';
-import { useGetTaskQuery } from '../../../app/services/task';
+import {
+  useGetTaskQuery,
+  useUpdateTaskMutation,
+} from '../../../app/services/task';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../../common/components/Button';
@@ -15,6 +19,7 @@ import ReactQuill from 'react-quill';
 import { useGetUsersQuery } from '../../../app/services/user';
 import { ArrowUpIcon } from '../../../icons/ArrowUpIcon';
 import { ArrowDownIcon } from '../../../icons/ArrowDownIcon';
+import { TaskDeleteModal } from './TaskDeleteModal';
 
 const priorityIconMap = {
   highest: <ArrowUpIcon className='text-[#CD272D]' />,
@@ -37,6 +42,8 @@ export const TaskEditModal = () => {
   const [assignees, setAssignees] = useState([]);
   const [priority, setPriority] = useState();
   const { data: users } = useGetUsersQuery();
+  const [updateTask] = useUpdateTaskMutation();
+  const [isDeleteTaskModalOpen, setDeleteTaskModalOpen] = useState(false);
   const userOptions = users ? users.map((u) => ({ value: u.id, data: u })) : [];
   const [isShowDescriptionEditor, setShowDescriptionEditor] = useState(false);
 
@@ -47,9 +54,14 @@ export const TaskEditModal = () => {
     setDescription(task.description);
     setStatus(task.status);
     setAssignees(() => task.assignees.map((assignee) => assignee.id));
+    // if (typeof task.reporter === 'string') {
+    //   setReporter(() => task.reporter);
+    // } else {
     setReporter(() => task.reporter.id);
+    // }
     setPriority(task.priority);
   }, [task]);
+
   const navigate = useNavigate();
 
   if (!task) {
@@ -92,6 +104,11 @@ export const TaskEditModal = () => {
               }}
               onChange={(value) => {
                 setType(value);
+                updateTask({
+                  id: taskId,
+                  type: value,
+                  projectId,
+                });
               }}
               renderOption={(option) => (
                 <div className='px-3 py-2 hover:bg-gray-200 flex gap-3 items-center'>
@@ -108,7 +125,14 @@ export const TaskEditModal = () => {
               )}
             </Select>
           </div>
-          <div>
+          <div className='flex items-center gap-2'>
+            <Button
+              onClick={() => setDeleteTaskModalOpen(true)}
+              isIcon
+              isTransparent={true}
+            >
+              <TrashIcon width={24} height={24} />
+            </Button>
             <Button
               isIcon={true}
               isTransparent
@@ -130,6 +154,15 @@ export const TaskEditModal = () => {
                 e.target.style.height = '5px';
                 e.target.style.height = e.target.scrollHeight + 'px';
               }}
+              onBlur={() => {
+                if (task.name !== name) {
+                  updateTask({
+                    id: taskId,
+                    projectId,
+                    name,
+                  });
+                }
+              }}
             />
             <div className='mb-3'>
               <span className='font-medium text-sm text-[#5e6c84] mb-1'>
@@ -144,8 +177,16 @@ export const TaskEditModal = () => {
                   />
                   <div className='flex gap-1 mt-2'>
                     <Button
-                      type='primary'
-                      onClick={() => console.log('description ', description)}
+                      variant='primary'
+                      onClick={() => {
+                        updateTask({
+                          id: taskId,
+                          description,
+                          projectId,
+                        }).then(() => {
+                          setShowDescriptionEditor(false);
+                        });
+                      }}
                     >
                       Save
                     </Button>
@@ -182,7 +223,7 @@ export const TaskEditModal = () => {
                   },
                   {
                     value: 'in_progress',
-                    data: { label: 'Story' },
+                    data: { label: 'In progress' },
                   },
                   {
                     value: 'done',
@@ -203,6 +244,11 @@ export const TaskEditModal = () => {
                 }}
                 onChange={(value) => {
                   setStatus(value);
+                  updateTask({
+                    id: taskId,
+                    status: value,
+                    projectId,
+                  });
                 }}
                 renderOption={(option) => (
                   <div className='px-3 py-2 hover:bg-gray-200 flex gap-3 items-center'>
@@ -231,7 +277,13 @@ export const TaskEditModal = () => {
                   </div>
                 )}
                 onSelect={(value) => {
-                  setAssignees((assignees) => [...assignees, value]);
+                  const updatedAssignees = [...assignees, value];
+                  setAssignees(updatedAssignees);
+                  updateTask({
+                    id: taskId,
+                    assigneeIds: updatedAssignees,
+                    projectId,
+                  });
                 }}
                 dropdownClassName='right-0'
               >
@@ -244,11 +296,15 @@ export const TaskEditModal = () => {
                             key={index}
                             className='flex bg-gray-200 py-1 px-2 gap-2 items-center cursor-pointer'
                             onClick={() => {
-                              setAssignees((assignees) =>
-                                assignees.filter(
-                                  (assignee) => assignee !== option.value
-                                )
+                              const updatedAssignees = assignees.filter(
+                                (assignee) => assignee !== option.value
                               );
+                              setAssignees(updatedAssignees);
+                              updateTask({
+                                id: taskId,
+                                assigneeIds: updatedAssignees,
+                                projectId,
+                              });
                             }}
                           >
                             <Avatar src={option.data.avatar} />
@@ -291,6 +347,11 @@ export const TaskEditModal = () => {
                 }}
                 onChange={(value) => {
                   setReporter(value);
+                  updateTask({
+                    id: taskId,
+                    reporterId: value,
+                    projectId,
+                  });
                 }}
                 renderOption={(option) => {
                   return (
@@ -340,10 +401,6 @@ export const TaskEditModal = () => {
                   },
                   {
                     value: 'medium',
-                    data: { label: 'Story', icon: priorityIconMap['medium'] },
-                  },
-                  {
-                    value: 'medium',
                     data: {
                       label: 'Medium',
                       icon: priorityIconMap['medium'],
@@ -375,6 +432,11 @@ export const TaskEditModal = () => {
                 }}
                 onChange={(value) => {
                   setPriority(value);
+                  updateTask({
+                    id: taskId,
+                    priority: value,
+                    projectId,
+                  });
                 }}
                 renderOption={(option) => (
                   <div className='px-3 py-2 hover:bg-gray-200 flex gap-3 items-center'>
@@ -400,6 +462,11 @@ export const TaskEditModal = () => {
           </div>
         </div>
       </div>
+      <TaskDeleteModal
+        isOpen={isDeleteTaskModalOpen}
+        setOpen={setDeleteTaskModalOpen}
+        taskId={taskId}
+      />
     </ReactModal>
   );
 };

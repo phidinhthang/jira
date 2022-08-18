@@ -1,14 +1,15 @@
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Input } from '../../common/components/Input';
 import { Button } from '../../common/components/Button';
-import { useLoginMutation } from '../../../app/services/auth';
-import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { useRegisterMutation } from '../../../app/services/auth';
 
-export const LoginPage = () => {
+export const RegisterPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [login] = useLoginMutation();
+  const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [register] = useRegisterMutation();
   const navigate = useNavigate();
 
   return (
@@ -18,13 +19,12 @@ export const LoginPage = () => {
           className='w-full'
           onSubmit={(e) => {
             e.preventDefault();
-            login({ username, password })
+            register({ username, password, displayName, email })
               .unwrap()
               .then((res) => {
                 if (typeof res.accessToken === 'string') {
                   localStorage.setItem('bearerToken', res.accessToken);
                   navigate('/projects');
-                  toast('Login successfully!', { type: 'success' });
                 }
               })
               .catch((err) => {});
@@ -42,6 +42,24 @@ export const LoginPage = () => {
           </div>
           <div className='mb-3'>
             <label className='font-medium text-sm text-[#5e6c84]'>
+              Display name
+            </label>
+            <Input
+              placeholder='Enter your name'
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+            />
+          </div>
+          <div className='mb-3'>
+            <label className='font-medium text-sm text-[#5e6c84]'>Email</label>
+            <Input
+              placeholder='Enter your email'
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className='mb-3'>
+            <label className='font-medium text-sm text-[#5e6c84]'>
               Password
             </label>
             <Input
@@ -52,17 +70,17 @@ export const LoginPage = () => {
             />
           </div>
           <p className='text-sm'>
-            Doesn't have an account ?{' '}
+            Already have an account ?{' '}
             <Link
-              to='/register'
+              to='/login'
               className='text-blue-700 hover:underline font-medium'
             >
-              register
+              login
             </Link>
           </p>
           <div className='mt-3'>
             <Button className='py-2' type='submit' isFullWidth={true}>
-              Login
+              Register
             </Button>
           </div>
         </form>
