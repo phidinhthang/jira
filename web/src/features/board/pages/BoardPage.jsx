@@ -17,7 +17,7 @@ import { StoryIcon } from '../../../icons/StoryIcon';
 import { BugIcon } from '../../../icons/BugIcon';
 import { TaskIcon } from '../../../icons/TaskIcon';
 import { useGetUsersQuery } from '../../../app/services/user';
-import { Avatar } from '../../../features/common/components/Avatar';
+import { Avatar, AvatarList } from '../../../features/common/components/Avatar';
 import { ArrowUpIcon } from '../../../icons/ArrowUpIcon';
 import { ArrowDownIcon } from '../../../icons/ArrowDownIcon';
 import { MultipleSelect } from '../../../features/common/components/MultipleSelect';
@@ -37,11 +37,23 @@ const priorityIconMap = {
 export const BoardPage = () => {
   const params = useParams();
   const navigate = useNavigate();
+  const [searchText, setSearchText] = useState('');
   const projectId = params.projectId;
   const { data: project } = useGetProjectQuery(projectId);
   const { data: tasks } = useGetTasksQuery(projectId);
+  const [filteredAssignees, setFilteredAssignees] = useState([]);
   const [updateTask, { isLoading }] = useUpdateTaskMutation();
-  const taskByStatus = tasks?.reduce(
+  const { data: users } = useGetUsersQuery();
+  const filteredTasks = tasks
+    ?.filter((task) => task.name.includes(searchText))
+    ?.filter((task) => {
+      if (!filteredAssignees.length) return true;
+      const assigneeIds = task.assignees.map((assignee) => assignee.id);
+      return assigneeIds.some((assigneeId) =>
+        filteredAssignees.includes(assigneeId)
+      );
+    });
+  const taskByStatus = filteredTasks?.reduce(
     (acc, task) => {
       acc[task.status].push(task);
       return acc;
@@ -80,6 +92,36 @@ export const BoardPage = () => {
           Kanban board
         </div>
         <h1 className='font-semibold text-2xl'>Kanban Board</h1>
+      </div>
+      <div className='flex items-center mt-4'>
+        <Input
+          placeholder='Search...'
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+        />
+        <div className='ml-3 flex gap-1'>
+          <AvatarList
+            users={users || []}
+            liftUpOnHover
+            size='lg'
+            avatarClassname='cursor-pointer'
+            isHighlight={(user) => {
+              const checked = filteredAssignees.includes(user.id);
+              return checked;
+            }}
+            onAvatarClick={(user) => {
+              const checked = filteredAssignees.includes(user.id);
+              if (checked) {
+                setFilteredAssignees((assignees) =>
+                  assignees.filter((assignee) => assignee !== user.id)
+                );
+              } else {
+                setFilteredAssignees((assignees) => [...assignees, user.id]);
+              }
+            }}
+            limit={5}
+          />
+        </div>
       </div>
       <DragDropContext
         onDragEnd={(result) => {
@@ -178,43 +220,9 @@ export const BoardPage = () => {
               });
             }
           }
-          // const upperTask =
-          //   result.destination.index ===
-          //   taskByStatus[result.destination.droppableId].length -
-          //     Number(
-          //       result.destination.droppableId === result.source.droppableId
-          //     )
-          //     ? result.destination.index + 1
-          //     : taskByStatus[result.destination.droppableId][
-          //         result.destination.index +
-          //           Number(
-          //             result.destination.droppableId ===
-          //               result.source.droppableId &&
-          //               result.source.index < result.destination.index
-          //           )
-          //       ].index;
-          // const lowerTask =
-          //   result.destination.index === 0
-          //     ? 0
-          //     : taskByStatus[result.destination.droppableId][
-          //         result.destination.index -
-          //           1 +
-          //           Number(
-          //             result.destination.droppableId ===
-          //               result.source.droppableId &&
-          //               result.source.index < result.destination.index
-          //           )
-          //       ].index;
-          // const updatedIndex = (upperTask + lowerTask) / 2;
-          // const updatedStatus = result.destination.droppableId;
-          // updateTask({
-          //   id: updatedTask.id,
-          //   index: updatedIndex,
-          //   status: updatedStatus,
-          // });
         }}
       >
-        <div className='flex gap-2 py-8'>
+        <div className='flex gap-2 py-6'>
           {['backlog', 'selected_for_development', 'in_progress', 'done'].map(
             (status) => (
               <BoardList status={status} key={status}>

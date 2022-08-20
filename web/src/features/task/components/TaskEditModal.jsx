@@ -20,6 +20,9 @@ import { useGetUsersQuery } from '../../../app/services/user';
 import { ArrowUpIcon } from '../../../icons/ArrowUpIcon';
 import { ArrowDownIcon } from '../../../icons/ArrowDownIcon';
 import { TaskDeleteModal } from './TaskDeleteModal';
+import { Progress } from '../../common/components/Progress';
+import { ClockIcon } from '../../../icons/ClockIcon';
+import { TimeTrackingModal } from './TimeTrackingModal';
 
 const priorityIconMap = {
   highest: <ArrowUpIcon className='text-[#CD272D]' />,
@@ -41,11 +44,24 @@ export const TaskEditModal = () => {
   const [reporter, setReporter] = useState();
   const [assignees, setAssignees] = useState([]);
   const [priority, setPriority] = useState();
+  const [estimatedTime, setEstimatedTime] = useState();
+  const [spentTime, setSpentTime] = useState();
+  const [remainingTime, setRemainingTime] = useState();
   const { data: users } = useGetUsersQuery();
   const [updateTask] = useUpdateTaskMutation();
   const [isDeleteTaskModalOpen, setDeleteTaskModalOpen] = useState(false);
+  const [isShowTimeTrackingModal, setShowTimeTrackingModal] = useState(false);
   const userOptions = users ? users.map((u) => ({ value: u.id, data: u })) : [];
   const [isShowDescriptionEditor, setShowDescriptionEditor] = useState(false);
+
+  const timeTrackingValue =
+    (spentTime
+      ? remainingTime
+        ? spentTime / (spentTime + remainingTime)
+        : estimatedTime
+        ? spentTime / estimatedTime
+        : 1
+      : 0) * 100;
 
   useEffect(() => {
     if (!task) return;
@@ -54,9 +70,9 @@ export const TaskEditModal = () => {
     setDescription(task.description);
     setStatus(task.status);
     setAssignees(() => task.assignees.map((assignee) => assignee.id));
-    // if (typeof task.reporter === 'string') {
-    //   setReporter(() => task.reporter);
-    // } else {
+    setEstimatedTime(task.estimatedTime);
+    setSpentTime(task.spentTime);
+    setRemainingTime(task.remainingTime);
     setReporter(() => task.reporter.id);
     // }
     setPriority(task.priority);
@@ -144,26 +160,34 @@ export const TaskEditModal = () => {
         </div>
         <div className='mt-5 flex gap-3 justify-between'>
           <div className='w-3/5 p-4'>
-            <Input
-              className='border-0 focus-within:ring-2 font-medium text-xl focus-within:!bg-white hover:bg-gray-200 h-full py-2 -mx-2 mb-3'
-              isTextarea={true}
-              spellCheck={false}
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                e.target.style.height = '5px';
-                e.target.style.height = e.target.scrollHeight + 'px';
-              }}
-              onBlur={() => {
-                if (task.name !== name) {
-                  updateTask({
-                    id: taskId,
-                    projectId,
-                    name,
-                  });
-                }
-              }}
-            />
+            <div className='mb-3 -mx-2'>
+              <Input
+                className='border-0 focus-within:ring-2 font-medium text-xl focus-within:!bg-white hover:bg-gray-200 h-full py-2'
+                hasError={!name}
+                isTextarea={true}
+                spellCheck={false}
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  e.target.style.height = '5px';
+                  e.target.style.height = e.target.scrollHeight + 'px';
+                }}
+                onBlur={() => {
+                  if (name && task.name !== name) {
+                    updateTask({
+                      id: taskId,
+                      projectId,
+                      name,
+                    });
+                  }
+                }}
+              />
+              {!name && (
+                <p className='text-sm text-red-700 font-medium mx-2'>
+                  This field is required!
+                </p>
+              )}
+            </div>
             <div className='mb-3'>
               <span className='font-medium text-sm text-[#5e6c84] mb-1'>
                 Description
@@ -175,17 +199,24 @@ export const TaskEditModal = () => {
                     value={description}
                     onChange={setDescription}
                   />
+                  {!description && (
+                    <p className='text-sm text-red-700 font-medium'>
+                      This field is required!
+                    </p>
+                  )}
                   <div className='flex gap-1 mt-2'>
                     <Button
                       variant='primary'
                       onClick={() => {
-                        updateTask({
-                          id: taskId,
-                          description,
-                          projectId,
-                        }).then(() => {
-                          setShowDescriptionEditor(false);
-                        });
+                        if (description) {
+                          updateTask({
+                            id: taskId,
+                            description,
+                            projectId,
+                          }).then(() => {
+                            setShowDescriptionEditor(false);
+                          });
+                        }
                       }}
                     >
                       Save
@@ -459,6 +490,43 @@ export const TaskEditModal = () => {
                 )}
               </Select>
             </div>
+            <div className='mb-4'>
+              <span className='font-medium text-sm text-[#5e6c84] mb-1'>
+                Original Estimate (Hours)
+              </span>
+              <div>
+                <Input
+                  placeholder='Number'
+                  value={estimatedTime}
+                  onChange={(e) => {
+                    const estimatedTime =
+                      parseInt(e.target.value.replace(/\D/, ''), 10) || null;
+                    setEstimatedTime(estimatedTime);
+                    updateTask({
+                      id: taskId,
+                      estimatedTime,
+                    });
+                  }}
+                  onBlur={(e) => {}}
+                />
+              </div>
+            </div>
+            <div className='mb-4'>
+              <span className='font-medium text-sm text-[#5e6c84]'>
+                Time tracking (Hours)
+              </span>
+              <div
+                className='flex gap-3 mt-1 hover:bg-gray-200 p-1 rounded-sm cursor-pointer'
+                onClick={() => setShowTimeTrackingModal(true)}
+              >
+                <div className='text-[#5e6c84]'>
+                  <ClockIcon width={24} height={24} />
+                </div>
+                <div className='flex-grow'>
+                  <Progress value={timeTrackingValue} task={task} />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -466,6 +534,11 @@ export const TaskEditModal = () => {
         isOpen={isDeleteTaskModalOpen}
         setOpen={setDeleteTaskModalOpen}
         taskId={taskId}
+      />
+      <TimeTrackingModal
+        isOpen={isShowTimeTrackingModal}
+        setOpen={setShowTimeTrackingModal}
+        task={task}
       />
     </ReactModal>
   );

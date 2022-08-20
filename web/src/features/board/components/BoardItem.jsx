@@ -4,7 +4,7 @@ import { StoryIcon } from '../../../icons/StoryIcon';
 import { TaskIcon } from '../../../icons/TaskIcon';
 import { ArrowUpIcon } from '../../../icons/ArrowUpIcon';
 import { ArrowDownIcon } from '../../../icons/ArrowDownIcon';
-import { Avatar } from '../../common/components/Avatar';
+import { Avatar, AvatarList } from '../../common/components/Avatar';
 import { Draggable } from 'react-beautiful-dnd';
 
 const taskTypeIconMap = {
@@ -40,9 +40,7 @@ export const BoardItem = ({ task, index, onClick }) => {
               <div>{priorityIconMap[task.priority]}</div>
             </div>
             <div className='flex gap-1'>
-              {task.assignees?.map((assignee, index) => (
-                <Avatar src={assignee.avatar} key={index} />
-              ))}
+              <AvatarList users={task.assignees} />
             </div>
           </div>
         </div>

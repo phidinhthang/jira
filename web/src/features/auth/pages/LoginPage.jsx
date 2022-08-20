@@ -37,6 +37,7 @@ export const LoginPage = () => {
             <Input
               placeholder='Enter your username'
               value={username}
+              hasError={true}
               onChange={(e) => setUsername(e.target.value)}
             />
           </div>

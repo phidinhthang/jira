@@ -39,6 +39,18 @@ module.exports = {
       isIn: ["lowest", "low", "medium", "high", "highest"],
       required: true,
     },
+    estimatedTime: {
+      type: "number",
+      allowNull: true,
+    },
+    spentTime: {
+      type: "number",
+      allowNull: true,
+    },
+    remainingTime: {
+      type: "number",
+      allowNull: true,
+    },
     createdAt: {
       type: "ref",
       columnType: "datetime",

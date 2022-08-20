@@ -9,8 +9,9 @@ module.exports = async function update(req, res) {
     assigneeIds,
     reporterId,
     priority,
-    dueAt,
-    estimatedAt,
+    remainingTime,
+    estimatedTime,
+    spentTime,
   } = req.body || {};
 
   const updateFields = {
@@ -21,8 +22,9 @@ module.exports = async function update(req, res) {
     index,
     reporter: reporterId,
     priority,
-    dueAt,
-    estimatedAt,
+    remainingTime,
+    estimatedTime,
+    spentTime,
   };
 
   // if (typeof index === "undefined") {
