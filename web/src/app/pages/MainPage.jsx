@@ -65,7 +65,7 @@ export const MainPage = () => {
   );
 
   if (!taskByStatus) {
-    return <div>loading</div>;
+    return <div>loading...</div>;
   }
 
   const userOptions = users ? users.map((u) => ({ value: u.id, data: u })) : [];

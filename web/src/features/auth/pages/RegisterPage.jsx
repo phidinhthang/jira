@@ -27,7 +27,9 @@ export const RegisterPage = () => {
                   navigate('/projects');
                 }
               })
-              .catch((err) => {});
+              .catch((err) => {
+                console.log('register error ', err);
+              });
           }}
         >
           <div className='mb-3'>

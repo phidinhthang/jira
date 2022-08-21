@@ -12,6 +12,7 @@
     "dotenv": "^16.0.1",
     "grunt": "1.0.4",
     "jsonwebtoken": "^8.5.1",
+    "node-fetch": "^2.6.7",
     "nodemailer": "^6.7.8",
     "sails": "^1.5.3",
     "sails-hook-dotenv": "^0.1.1",

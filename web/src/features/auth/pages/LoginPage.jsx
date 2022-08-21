@@ -37,7 +37,6 @@ export const LoginPage = () => {
             <Input
               placeholder='Enter your username'
               value={username}
-              hasError={true}
               onChange={(e) => setUsername(e.target.value)}
             />
           </div>
@@ -62,8 +61,21 @@ export const LoginPage = () => {
             </Link>
           </p>
           <div className='mt-3'>
-            <Button className='py-2' type='submit' isFullWidth={true}>
+            <Button className='py-2 mb-2' type='submit' isFullWidth={true}>
               Login
+            </Button>
+            <Button
+              className='py-2 flex items-center gap-3 bg-white!'
+              isFullWidth
+              onClick={(e) => {
+                e.preventDefault();
+                fetch(`${import.meta.env.VITE_API_URL}auth/google/url`)
+                  .then((res) => res.json())
+                  .then((data) => (window.location.href = data.url));
+              }}
+            >
+              <img src='/google.png' className='w-6 h-6 rounded-full' />
+              <span>Login with google</span>
             </Button>
           </div>
         </form>

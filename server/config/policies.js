@@ -19,18 +19,18 @@ module.exports.policies = {
   // '*': true,
   "auth/list": "isLoggedIn",
 
-  "user/getMe": "isLoggedIn",
+  "user/get-me": "isLoggedIn",
   "user/list": "isLoggedIn",
 
   "project/create": "isLoggedIn",
   "project/delete": "isLoggedIn",
   "project/update": "isLoggedIn",
   "project/list": "isLoggedIn",
-  "project/getById": "isLoggedIn",
+  "project/get-by-id": "isLoggedIn",
 
   "task/create": "isLoggedIn",
   "task/delete": "isLoggedIn",
   "task/update": "isLoggedIn",
   "task/list": "isLoggedIn",
-  "task/getById": "isLoggedIn",
+  "task/get-by-id": "isLoggedIn",
 };

@@ -18,7 +18,10 @@ export const userApi = createApi({
     getUsers: build.query({
       query: () => '/user/list',
     }),
+    getMe: build.query({
+      query: () => '/user/me',
+    }),
   }),
 });
 
-export const { useGetUsersQuery } = userApi;
+export const { useGetUsersQuery, useGetMeQuery } = userApi;

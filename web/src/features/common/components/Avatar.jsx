@@ -1,6 +1,7 @@
 const avatarSizeMap = {
   md: 'w-6 h-6',
   lg: 'w-8 h-8',
+  xl: 'w-24 h-24',
   sm: 'w-4 h-4',
 };
 

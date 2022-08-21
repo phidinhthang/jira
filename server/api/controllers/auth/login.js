@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require("uuid");
 module.exports = async function login(req, res) {
   const username = req.body.username;
   const password = req.body.password;
-  const userAuth = await Auth.findOne({ username });
+  const userAuth = await Auth.findOne({ username, accountType: "local" });
   console.log("access token secret ", process.env.ACCESS_TOKEN_SECRET);
   if (!userAuth) {
     return res.status(401).json({

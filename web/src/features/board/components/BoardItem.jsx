@@ -40,7 +40,7 @@ export const BoardItem = ({ task, index, onClick }) => {
               <div>{priorityIconMap[task.priority]}</div>
             </div>
             <div className='flex gap-1'>
-              <AvatarList users={task.assignees} />
+              <AvatarList users={task.assignees || []} />
             </div>
           </div>
         </div>

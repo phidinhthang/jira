@@ -37,6 +37,12 @@ export const projectApi = createApi({
             Object.assign(draft, updatedProject);
           })
         );
+        dispatch(
+          projectApi.util.updateQueryData('getProjects', {}, (draft) => {
+            const oldProject = draft.find((project) => project.id === id);
+            Object.assign(oldProject, updatedProject);
+          })
+        );
       },
     }),
     deleteProject: build.mutation({

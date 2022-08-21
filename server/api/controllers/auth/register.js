@@ -51,6 +51,7 @@ module.exports = async function register(req, res) {
     password: hashedPassword,
     user: user.id,
     email,
+    accountType: "local",
   }).fetch();
 
   const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;

@@ -7,5 +7,14 @@ module.exports = {
       model: "user",
       unique: true,
     },
+    accountType: {
+      type: "string",
+      isIn: ["local", "google"],
+      defaultsTo: "local",
+    },
+    googleId: {
+      type: "string",
+      required: false,
+    },
   },
 };

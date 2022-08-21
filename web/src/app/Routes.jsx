@@ -6,6 +6,7 @@ import { ProjectPage } from '../features/project/pages/ProjectPage';
 import { BoardPage } from '../features/board/pages/BoardPage';
 import { TaskEditModal } from '../features/task/components/TaskEditModal';
 import { ProjectCreateModal } from '../features/project/components/ProjectCreateModal';
+import { ProfilePage } from '../features/user/pages/ProfilePage';
 import { TaskCreateModal } from '../features/task/components/TaskCreateModal';
 import { Provider } from 'react-redux';
 import { store } from '../app/store';
@@ -16,6 +17,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { VerifySuccessPage } from '../features/auth/pages/VerifySuccessPage';
 import { VerifyErrorPage } from '../features/auth/pages/VerifyErrorPage';
+import { GoogleTokenPage } from '../features/auth/pages/GoogleToken';
 
 export const Routes = () => {
   const [state, setState] = useState({
@@ -33,6 +35,7 @@ export const Routes = () => {
     >
       <Provider store={store}>
         <RouterRoutes>
+          <Route path='/auth/google/token' element={<GoogleTokenPage />} />
           <Route path='/login' element={<LoginPage />} />
           <Route path='/auth/verify/success' element={<VerifySuccessPage />} />
           <Route path='/auth/verify/error' element={<VerifyErrorPage />} />
@@ -41,6 +44,7 @@ export const Routes = () => {
             <Route path='create' element={<ProjectCreateModal />} />
           </Route>
           <Route path='/projects/:projectId' element={<ProjectPage />}>
+            <Route path='profile' element={<ProfilePage />} />
             <Route path='edit' element={<ProjectEditPage />} />
             <Route path='board' element={<BoardPage />}>
               <Route path='tasks/:taskId' element={<TaskEditModal />} />

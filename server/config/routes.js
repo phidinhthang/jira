@@ -23,18 +23,21 @@ module.exports.routes = {
   "POST /auth/login": "auth/login",
   "GET /auth/list": "auth/list",
   "GET /auth/:emailToken/verify": "auth/verify",
+  "GET /auth/google/url": "auth/google/url",
+  "GET /auth/google/callback": "auth/google/callback",
 
   "GET /user/list": "user/list",
+  "GET /user/me": "user/get-me",
 
   "GET /project/list": "project/list",
-  "GET /project/:id": "project/getById",
+  "GET /project/:id": "project/get-by-id",
   "POST /project/create": "project/create",
   "PATCH /project/update/:id": "project/update",
   "DELETE /project/delete/:id": "project/delete",
 
   "GET /task/:projectId/list": "task/list",
   "POST /task/create": "task/create",
-  "GET /task/:id": "task/getById",
+  "GET /task/:id": "task/get-by-id",
   "PATCH /task/update/:id": "task/update",
   "DELETE /task/delete/:id": "task/delete",
 

@@ -25,5 +25,7 @@ module.exports = async function create(req, res) {
     index: index + 1,
   }).fetch();
 
-  return res.json(task);
+  const taskId = task.id;
+
+  return res.json(await Task.findOne({ id: taskId }).populate("assignees"));
 };

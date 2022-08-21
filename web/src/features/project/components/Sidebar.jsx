@@ -9,6 +9,9 @@ import { PaperIcon } from '../../../icons/PaperIcon';
 import { PlusIcon } from '../../../icons/PlusIcon';
 import { TruckIcon } from '../../../icons/TruckIcon';
 import { LogoutIcon } from '../../../icons/LogoutIcon';
+import { UserIcon } from '../../../icons/UserIcon';
+import { Avatar } from '../../common/components/Avatar';
+import { useGetMeQuery } from '../../../app/services/user';
 
 const SidebarItem = ({
   isActive,
@@ -48,16 +51,29 @@ export const Sidebar = () => {
   const params = useParams();
   const navigate = useNavigate();
   const id = params.projectId;
+  const { data: me } = useGetMeQuery();
 
   return (
     <div className='bg-gray-100 h-screen p-3 w-[220px] flex-shrink-0'>
       <div className='flex flex-col gap-1'>
-        <NavLink to='/projects'>
+        <div className='p-2 pb-3 flex gap-3'>
+          <Avatar src={me?.avatar} size='lg' />
+          <h4 className='font-semibold'>{me?.displayName}</h4>
+        </div>
+        <NavLink to={`/projects/${id}/profile`}>
           {({ isActive }) => (
-            <SidebarItem leftIcon={<CollectionIcon width={24} height={24} />}>
-              All Projects
+            <SidebarItem
+              isActive={isActive}
+              leftIcon={<UserIcon width={24} height={24} />}
+            >
+              My Profile
             </SidebarItem>
           )}
+        </NavLink>
+        <NavLink to='/projects'>
+          <SidebarItem leftIcon={<CollectionIcon width={24} height={24} />}>
+            All Projects
+          </SidebarItem>
         </NavLink>
         <NavLink to={`/projects/${id}/board`} end>
           {({ isActive }) => (
