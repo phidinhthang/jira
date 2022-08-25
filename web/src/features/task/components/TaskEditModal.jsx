@@ -23,6 +23,9 @@ import { TaskDeleteModal } from './TaskDeleteModal';
 import { Progress } from '../../common/components/Progress';
 import { ClockIcon } from '../../../icons/ClockIcon';
 import { TimeTrackingModal } from './TimeTrackingModal';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
 
 const priorityIconMap = {
   highest: <ArrowUpIcon className='text-[#CD272D]' />,
@@ -53,6 +56,8 @@ export const TaskEditModal = () => {
   const [isShowTimeTrackingModal, setShowTimeTrackingModal] = useState(false);
   const userOptions = users ? users.map((u) => ({ value: u.id, data: u })) : [];
   const [isShowDescriptionEditor, setShowDescriptionEditor] = useState(false);
+
+  console.log('update task ', task);
 
   const timeTrackingValue =
     (spentTime
@@ -288,8 +293,21 @@ export const TaskEditModal = () => {
                 )}
               >
                 {(option) => (
-                  <div className='border border-[rgb(179, 186, 197)] px-3 py-1 flex gap-3 items-center'>
-                    <span>{option.data.label}</span>
+                  <div className='relative rounded-[4px] curosr-pointer text-sm inline-block'>
+                    <div className='flex items-center'>
+                      <div
+                        className={`uppercase transition-all duration-100 inline-flex items-center rounded-[4px] cursor-pointer font-semibold select-none text-xs py-0 px-3 h-8 ${
+                          option.value === 'backlog' ||
+                          option.value === 'selected_for_development'
+                            ? 'bg-[rgb(223,225,230)] text-[rbg(66,82,110)]'
+                            : option.value === 'in_progress'
+                            ? 'text-white bg-[rgb(0,82,204)]'
+                            : 'text-white bg-[rgb(11,135,91)]'
+                        }`}
+                      >
+                        <div>{option.data.label}</div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </Select>
@@ -525,6 +543,14 @@ export const TaskEditModal = () => {
                 <div className='flex-grow'>
                   <Progress value={timeTrackingValue} task={task} />
                 </div>
+              </div>
+            </div>
+            <div className='border-t border-gray-300 text-sm text-gray-600 font-medium'>
+              <div className='mt-3'>
+                Created at {dayjs(task.createdAt).fromNow()}
+              </div>
+              <div className='mt-1'>
+                Updated at {dayjs(task.updatedAt).fromNow()}
               </div>
             </div>
           </div>

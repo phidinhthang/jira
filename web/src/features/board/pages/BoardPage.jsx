@@ -77,6 +77,22 @@ export const BoardPage = () => {
   );
   const [createTask, {}] = useCreateTaskMutation();
 
+  const highlightUser = (user) => {
+    const checked = filteredAssignees.includes(user.id);
+    return checked;
+  };
+
+  const onUserClick = (user) => {
+    const checked = filteredAssignees.includes(user.id);
+    if (checked) {
+      setFilteredAssignees((assignees) =>
+        assignees.filter((assignee) => assignee !== user.id)
+      );
+    } else {
+      setFilteredAssignees((assignees) => [...assignees, user.id]);
+    }
+  };
+
   if (!taskByStatus || !project) {
     return <div>loading</div>;
   }
@@ -105,20 +121,8 @@ export const BoardPage = () => {
             liftUpOnHover
             size='lg'
             avatarClassname='cursor-pointer'
-            isHighlight={(user) => {
-              const checked = filteredAssignees.includes(user.id);
-              return checked;
-            }}
-            onAvatarClick={(user) => {
-              const checked = filteredAssignees.includes(user.id);
-              if (checked) {
-                setFilteredAssignees((assignees) =>
-                  assignees.filter((assignee) => assignee !== user.id)
-                );
-              } else {
-                setFilteredAssignees((assignees) => [...assignees, user.id]);
-              }
-            }}
+            isHighlight={highlightUser}
+            onAvatarClick={onUserClick}
             limit={5}
           />
         </div>
@@ -222,7 +226,7 @@ export const BoardPage = () => {
           }
         }}
       >
-        <div className='flex gap-2 py-6'>
+        <div className='flex py-6 flex-wrap -mx-1'>
           {['backlog', 'selected_for_development', 'in_progress', 'done'].map(
             (status) => (
               <BoardList status={status} key={status}>

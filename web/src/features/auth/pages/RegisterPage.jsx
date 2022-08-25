@@ -6,10 +6,14 @@ import { useRegisterMutation } from '../../../app/services/auth';
 
 export const RegisterPage = () => {
   const [username, setUsername] = useState('');
+  const [usernameError, setUsernameError] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [displayName, setDisplayName] = useState('');
-  const [register] = useRegisterMutation();
+  const [displayNameError, setDisplayNameError] = useState('');
+  const [register, { isLoading }] = useRegisterMutation();
   const navigate = useNavigate();
 
   return (
@@ -19,6 +23,34 @@ export const RegisterPage = () => {
           className='w-full'
           onSubmit={(e) => {
             e.preventDefault();
+            let hasError = false;
+            if (!username) {
+              setUsernameError('This field is required.');
+              hasError = true;
+            } else if (username.length < 3) {
+              setUsernameError(
+                'Username length must be greater than or equal to 3.'
+              );
+              hasError = true;
+            } else if (username.length > 256) {
+              setUsernameError(
+                'Username length must be smaller than or equal to 256.'
+              );
+              hasError = true;
+            }
+            if (!password) {
+              setPasswordError('This field is required.');
+              hasError = true;
+            }
+            if (!email) {
+              setEmailError('This field is required.');
+              hasError = true;
+            }
+            if (!displayName) {
+              setDisplayNameError('This field is required.');
+              hasError = true;
+            }
+            if (hasError) return;
             register({ username, password, displayName, email })
               .unwrap()
               .then((res) => {
@@ -29,6 +61,9 @@ export const RegisterPage = () => {
               })
               .catch((err) => {
                 console.log('register error ', err);
+                if (err?.data?.errors?.usernameExists) {
+                  setUsernameError('Username already exists.');
+                }
               });
           }}
         >
@@ -39,8 +74,17 @@ export const RegisterPage = () => {
             <Input
               placeholder='Enter your username'
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              hasError={!!usernameError}
+              onChange={(e) => {
+                setUsernameError('');
+                setUsername(e.target.value);
+              }}
             />
+            {!!usernameError ? (
+              <span className='text-sm font-medium text-[#5e6c84] text-red-600'>
+                {usernameError}
+              </span>
+            ) : null}
           </div>
           <div className='mb-3'>
             <label className='font-medium text-sm text-[#5e6c84]'>
@@ -49,16 +93,34 @@ export const RegisterPage = () => {
             <Input
               placeholder='Enter your name'
               value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
+              hasError={!!displayNameError}
+              onChange={(e) => {
+                setDisplayNameError('');
+                setDisplayName(e.target.value);
+              }}
             />
+            {!!displayNameError ? (
+              <span className='text-sm font-medium text-[#5e6c84] text-red-600'>
+                {displayNameError}
+              </span>
+            ) : null}
           </div>
           <div className='mb-3'>
             <label className='font-medium text-sm text-[#5e6c84]'>Email</label>
             <Input
               placeholder='Enter your email'
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              hasError={!!emailError}
+              onChange={(e) => {
+                setEmailError('');
+                setEmail(e.target.value);
+              }}
             />
+            {!!emailError ? (
+              <span className='text-sm font-medium text-[#5e6c84] text-red-600'>
+                {emailError}
+              </span>
+            ) : null}
           </div>
           <div className='mb-3'>
             <label className='font-medium text-sm text-[#5e6c84]'>
@@ -68,8 +130,17 @@ export const RegisterPage = () => {
               placeholder='Enter your password'
               type='password'
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              hasError={!!passwordError}
+              onChange={(e) => {
+                setPasswordError('');
+                setPassword(e.target.value);
+              }}
             />
+            {!!passwordError ? (
+              <span className='text-sm font-medium text-[#5e6c84] text-red-600'>
+                {passwordError}
+              </span>
+            ) : null}
           </div>
           <p className='text-sm'>
             Already have an account ?{' '}
@@ -81,7 +152,12 @@ export const RegisterPage = () => {
             </Link>
           </p>
           <div className='mt-3'>
-            <Button className='py-2' type='submit' isFullWidth={true}>
+            <Button
+              className='py-2'
+              type='submit'
+              isFullWidth={true}
+              isLoading={isLoading}
+            >
               Register
             </Button>
           </div>

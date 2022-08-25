@@ -27,15 +27,6 @@ module.exports = async function update(req, res) {
     spentTime,
   };
 
-  // if (typeof index === "undefined") {
-  //   const task = await Task.findOne(taskId);
-  //   if (typeof status !== "undefined" && task.status !== status) {
-  //     const lastIndex =
-  //       (await Task.count({ project: task.projectId, status })) + 1;
-  //     updateFields["index"] = lastIndex;
-  //   }
-  // }
-
   if (Array.isArray(assigneeIds)) {
     await Task.replaceCollection(taskId, "assignees", assigneeIds);
   }

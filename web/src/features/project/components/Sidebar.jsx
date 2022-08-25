@@ -42,7 +42,7 @@ const SidebarItem = ({
       }}
     >
       {leftIcon}
-      {text}
+      <span className='hidden sm:inline'>{text}</span>
     </div>
   );
 };
@@ -54,11 +54,11 @@ export const Sidebar = () => {
   const { data: me } = useGetMeQuery();
 
   return (
-    <div className='bg-gray-100 h-screen p-3 w-[220px] flex-shrink-0'>
+    <div className='bg-gray-100 h-screen p-3 w-16 sm:w-[220px] flex-shrink-0'>
       <div className='flex flex-col gap-1'>
         <div className='p-2 pb-3 flex gap-3'>
           <Avatar src={me?.avatar} size='lg' />
-          <h4 className='font-semibold'>{me?.displayName}</h4>
+          <h4 className='font-semibold hidden sm:block'>{me?.displayName}</h4>
         </div>
         <NavLink to={`/projects/${id}/profile`}>
           {({ isActive }) => (

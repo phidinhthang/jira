@@ -28,7 +28,7 @@ export const ProjectEditPage = () => {
     }
   }, [project]);
   return (
-    <div className='w-full'>
+    <div className='w-full px-4'>
       <div className='w-full max-w-[640px] mx-auto mt-6'>
         <h4 className='font-medium text-2xl mb-8'>Project Details</h4>
         <div className='mb-3'>

@@ -6,19 +6,23 @@ const sendEmail = require("../../utils/send-email");
 module.exports = async function register(req, res) {
   const { username, password, displayName, avatar, email } = req.body || {};
 
+  const errors = {};
+  if (!username) {
+    errors["emptyUsername"] = true;
+  }
+  if (!password) {
+    errors["emptyPassword"] = true;
+  }
   if (!displayName) {
-    return res.status(400).json({
-      errors: {
-        emptyDisplayName: true,
-      },
-    });
+    errors["emptyDisplayName"] = true;
+  }
+  if (!email) {
+    errors["emptyEmail"] = true;
   }
 
-  if (!email) {
+  if (Object.keys(errors).length) {
     return res.status(400).json({
-      errors: {
-        emptyEmail: true,
-      },
+      errors,
     });
   }
 

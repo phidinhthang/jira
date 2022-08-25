@@ -1,6 +1,5 @@
 module.exports = async function verifyEmail(req, res) {
   const emailToken = req.param("emailToken");
-  console.log("email token ", emailToken);
   if (!emailToken) {
     return res.redirect(`${process.env.WEB_URL}/auth/verify/error`);
   }
