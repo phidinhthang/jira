@@ -6,6 +6,7 @@ import { ArrowUpIcon } from '../../../icons/ArrowUpIcon';
 import { ArrowDownIcon } from '../../../icons/ArrowDownIcon';
 import { Avatar, AvatarList } from '../../common/components/Avatar';
 import { Draggable } from 'react-beautiful-dnd';
+import { ExclaimationIcon } from '../../../icons/ExclaimationIcon';
 
 const taskTypeIconMap = {
   task: <TaskIcon />,
@@ -35,9 +36,16 @@ export const BoardItem = ({ task, index, onClick }) => {
         >
           <div className='mb-3 text-[14.5px]'>{task.name}</div>
           <div className='flex justify-between items-center'>
-            <div className='flex gap-1'>
+            <div className='flex gap-1 items-center'>
               <div>{taskTypeIconMap[task.type]}</div>
               <div>{priorityIconMap[task.priority]}</div>
+              {task.hasExpired && (
+                <ExclaimationIcon
+                  width={24}
+                  height={24}
+                  className='text-yellow-500'
+                />
+              )}
             </div>
             <div className='flex gap-1'>
               <AvatarList users={task.assignees || []} />

@@ -13,6 +13,8 @@ export const TimeTrackingModal = ({ task, isOpen, setOpen }) => {
   const [remainingTime, setRemainingTime] = useState();
   const [updateTask] = useUpdateTaskMutation();
 
+  console.log('task ', task);
+
   console.log('estimated time ', estimatedTime);
   console.log('time remaing', remainingTime);
   console.log('spent time ', spentTime);
@@ -74,6 +76,7 @@ export const TimeTrackingModal = ({ task, isOpen, setOpen }) => {
                     setSpentTime(spentTime);
                     updateTask({
                       id: task.id,
+                      projectId: task.project.id,
                       spentTime,
                     });
                   }}
@@ -95,6 +98,7 @@ export const TimeTrackingModal = ({ task, isOpen, setOpen }) => {
                     updateTask({
                       id: task.id,
                       remainingTime,
+                      projectId: task.project.id,
                     });
                   }}
                   value={remainingTime}

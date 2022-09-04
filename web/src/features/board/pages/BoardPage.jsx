@@ -25,6 +25,7 @@ import { TimesIcon } from '../../../icons/TimesIcon';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { elementType } from 'prop-types';
 import { Button } from '../../common/components/Button';
+import { AssigneesModal } from '../../task/components/AssigneesModal';
 
 const priorityIconMap = {
   highest: <ArrowUpIcon className='text-[#CD272D]' />,
@@ -40,11 +41,27 @@ export const BoardPage = () => {
   const [searchText, setSearchText] = useState('');
   const projectId = params.projectId;
   const { data: project } = useGetProjectQuery(projectId);
-  const { data: tasks } = useGetTasksQuery(projectId);
+  const { data: rawTasks } = useGetTasksQuery(projectId);
   const [filteredAssignees, setFilteredAssignees] = useState([]);
   const [updateTask, { isLoading }] = useUpdateTaskMutation();
+  const [isAssigneesModalOpen, setAssigneesModalOpen] = useState(false);
+  const [showExpiredTask, setShowExpiredTask] = useState(false);
   const { data: users } = useGetUsersQuery();
+  const tasks = rawTasks?.map((task) => ({
+    ...task,
+    hasExpired:
+      task.estimatedTime &&
+      !task.spentTime &&
+      new Date(task.createdAt).getTime() + task.estimatedTime * 60 * 60 * 1000 <
+        Date.now(),
+  }));
   const filteredTasks = tasks
+    ?.filter((task) => {
+      if (showExpiredTask) {
+        return task.hasExpired;
+      }
+      return true;
+    })
     ?.filter((task) => task.name.includes(searchText))
     ?.filter((task) => {
       if (!filteredAssignees.length) return true;
@@ -53,6 +70,8 @@ export const BoardPage = () => {
         filteredAssignees.includes(assigneeId)
       );
     });
+
+  console.log('filtered tasks ', filteredTasks);
   const taskByStatus = filteredTasks?.reduce(
     (acc, task) => {
       acc[task.status].push(task);
@@ -115,7 +134,7 @@ export const BoardPage = () => {
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
         />
-        <div className='ml-3 flex gap-1'>
+        <div className='ml-4 flex gap-1'>
           <AvatarList
             users={users || []}
             liftUpOnHover
@@ -124,7 +143,20 @@ export const BoardPage = () => {
             isHighlight={highlightUser}
             onAvatarClick={onUserClick}
             limit={5}
+            onShowMore={() => setAssigneesModalOpen(true)}
           />
+        </div>
+        <div className='ml-4'>
+          <Button
+            className={`${
+              showExpiredTask
+                ? 'bg-[#D2E5FE] hover:bg-[#D2E5FE] text-[#6557CC]'
+                : ''
+            }`}
+            onClick={() => setShowExpiredTask((show) => !show)}
+          >
+            Expired Task
+          </Button>
         </div>
       </div>
       <DragDropContext
@@ -246,6 +278,13 @@ export const BoardPage = () => {
         </div>
       </DragDropContext>
       <Outlet />
+      <AssigneesModal
+        highlightUser={highlightUser}
+        isOpen={isAssigneesModalOpen}
+        setOpen={setAssigneesModalOpen}
+        onUserSelected={onUserClick}
+        users={users || {}}
+      />
     </div>
   );
 };

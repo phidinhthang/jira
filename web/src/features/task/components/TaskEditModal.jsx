@@ -22,6 +22,7 @@ import { ArrowDownIcon } from '../../../icons/ArrowDownIcon';
 import { TaskDeleteModal } from './TaskDeleteModal';
 import { Progress } from '../../common/components/Progress';
 import { ClockIcon } from '../../../icons/ClockIcon';
+import { ExclaimationIcon } from '../../../icons/ExclaimationIcon';
 import { TimeTrackingModal } from './TimeTrackingModal';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -56,8 +57,17 @@ export const TaskEditModal = () => {
   const [isShowTimeTrackingModal, setShowTimeTrackingModal] = useState(false);
   const userOptions = users ? users.map((u) => ({ value: u.id, data: u })) : [];
   const [isShowDescriptionEditor, setShowDescriptionEditor] = useState(false);
+  let hasExpired = false;
+
+  if (estimatedTime && !spentTime) {
+    hasExpired =
+      new Date(task.createdAt).getTime() + estimatedTime * 60 * 60 * 1000 <
+      Date.now();
+  }
 
   console.log('update task ', task);
+
+  console.log('has expired ', hasExpired);
 
   const timeTrackingValue =
     (spentTime
@@ -247,70 +257,79 @@ export const TaskEditModal = () => {
               <label className='font-medium text-sm text-[#5e6c84]'>
                 Status
               </label>
-              <Select
-                options={[
-                  {
-                    value: 'backlog',
-                    data: { label: 'Backlog' },
-                  },
-                  {
-                    value: 'selected_for_development',
-                    data: { label: 'Selected for development' },
-                  },
-                  {
-                    value: 'in_progress',
-                    data: { label: 'In progress' },
-                  },
-                  {
-                    value: 'done',
-                    data: { label: 'Done' },
-                  },
-                ]}
-                dropdownClassName='right-0 mx-[1px]'
-                value={status}
-                handleSearch={(option, searchText) => {
-                  if (
-                    option.data.label
-                      .toLowerCase()
-                      .includes(searchText.toLowerCase())
-                  ) {
-                    return true;
-                  }
-                  return false;
-                }}
-                onChange={(value) => {
-                  setStatus(value);
-                  updateTask({
-                    id: taskId,
-                    status: value,
-                    projectId,
-                  });
-                }}
-                renderOption={(option) => (
-                  <div className='px-3 py-2 hover:bg-gray-200 flex gap-3 items-center'>
-                    <span>{option.data.label}</span>
-                  </div>
-                )}
-              >
-                {(option) => (
-                  <div className='relative rounded-[4px] curosr-pointer text-sm inline-block'>
-                    <div className='flex items-center'>
-                      <div
-                        className={`uppercase transition-all duration-100 inline-flex items-center rounded-[4px] cursor-pointer font-semibold select-none text-xs py-0 px-3 h-8 ${
-                          option.value === 'backlog' ||
-                          option.value === 'selected_for_development'
-                            ? 'bg-[rgb(223,225,230)] text-[rbg(66,82,110)]'
-                            : option.value === 'in_progress'
-                            ? 'text-white bg-[rgb(0,82,204)]'
-                            : 'text-white bg-[rgb(11,135,91)]'
-                        }`}
-                      >
-                        <div>{option.data.label}</div>
+              <div className='flex items-center justify-between'>
+                <Select
+                  options={[
+                    {
+                      value: 'backlog',
+                      data: { label: 'Backlog' },
+                    },
+                    {
+                      value: 'selected_for_development',
+                      data: { label: 'Selected for development' },
+                    },
+                    {
+                      value: 'in_progress',
+                      data: { label: 'In progress' },
+                    },
+                    {
+                      value: 'done',
+                      data: { label: 'Done' },
+                    },
+                  ]}
+                  dropdownClassName='right-0 mx-[1px]'
+                  value={status}
+                  handleSearch={(option, searchText) => {
+                    if (
+                      option.data.label
+                        .toLowerCase()
+                        .includes(searchText.toLowerCase())
+                    ) {
+                      return true;
+                    }
+                    return false;
+                  }}
+                  onChange={(value) => {
+                    setStatus(value);
+                    updateTask({
+                      id: taskId,
+                      status: value,
+                      projectId,
+                    });
+                  }}
+                  renderOption={(option) => (
+                    <div className='px-3 py-2 hover:bg-gray-200 flex gap-3 items-center'>
+                      <span>{option.data.label}</span>
+                    </div>
+                  )}
+                >
+                  {(option) => (
+                    <div className='relative rounded-[4px] curosr-pointer text-sm inline-block'>
+                      <div className='flex items-center'>
+                        <div
+                          className={`uppercase transition-all duration-100 inline-flex items-center rounded-[4px] cursor-pointer font-semibold select-none text-xs py-0 px-3 h-8 ${
+                            option.value === 'backlog' ||
+                            option.value === 'selected_for_development'
+                              ? 'bg-[rgb(223,225,230)] text-[rbg(66,82,110)]'
+                              : option.value === 'in_progress'
+                              ? 'text-white bg-[rgb(0,82,204)]'
+                              : 'text-white bg-[rgb(11,135,91)]'
+                          }`}
+                        >
+                          <div>{option.data.label}</div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
+                </Select>
+                {hasExpired && (
+                  <ExclaimationIcon
+                    width={24}
+                    height={24}
+                    className='text-yellow-500'
+                  />
                 )}
-              </Select>
+              </div>
             </div>
             <div className='mb-4'>
               <label className='font-medium text-sm text-[#5e6c84]'>
@@ -522,6 +541,7 @@ export const TaskEditModal = () => {
                     setEstimatedTime(estimatedTime);
                     updateTask({
                       id: taskId,
+                      projectId,
                       estimatedTime,
                     });
                   }}
